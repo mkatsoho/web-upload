@@ -1,31 +1,24 @@
-# what is this
+# What is this
 
-upload a file to the server via a web page. The file is saved in /tmp.
+upload files to the server via a web page. By default files are saved in /tmp.
 
 
-## how to install
-
-```bash
-git clone git@gitlab.com:michel-yg-chen/web-upload.git
-yarn 
-```
-
-## how to run 
+## How to install
 
 ```bash
-yarn start		# http://your_ip:2222 or http://localhost:2222
+yarn global install pm2
+
+git clone git@gitlab.com:michel-yg-chen/web-upload.git && cd web-upload && yarn
 ```
 
-
-## where to get the uploaded files
+## How to run 
 
 ```bash
-ls -ltr /tmp/			# default in /tmp folder
+cd web-upload; ./pm2-restart.sh 8081 /tmp 
 ```
-
 
 ## reference
 
+- serve a folder using a web page [web](https://github.com/mkatsoho/web)
 - learn from the similar project [multiparty](https://yarnpkg.com/en/package/multiparty)
-- how to get a file from the server via a web page [serve](https://yarnpkg.com/en/package/serve)
 
