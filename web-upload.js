@@ -1,59 +1,67 @@
 #! /usr/bin/env node
 
-// ## libs
 var multiparty = require('multiparty');
-var util = require('util');
 var http = require('http');
-// var formidable = require('formidable');
+var util = require('util');
+var process = require('process');
 var fs = require('fs');
-var path = require('path');
-
-// ## vars
-var port=2222;
-console.log('url: http://localhost:'+port);
-console.log('file in folder:', '/tmp', '\n\n');
 
 
-// ## start server
-http.createServer(function(req, res) {
+var port = parseInt(process.argv[2] || 2222)
+var folder = process.argv[3] || '/tmp'
+console.log('url: http://localhost:' + port);
+console.log('files in:', folder)
+
+function renderHtml(uploadStatus, uploadStatusDetails) {
+  var html =
+    '<form action="/upload" enctype="multipart/form-data" method="post">' +
+    // '<input type="text" name="title"><br>'+
+    '<input type="file" name="upload" multiple="multiple"><br>' +
+    '<input type="submit" value="Upload">' +
+    '</form>' +
+    '<p3> <b>last upload info: </b></p3>' +
+    '<pre>' +
+    JSON.stringify(uploadStatus, null, 2) +
+    '</pre>' +
+    '<p3><b> last upload details: </b></p3>' +
+    '<pre>' +
+    JSON.stringify(uploadStatusDetails, null, 2) +
+    '</pre>'
+  return html
+}
+
+function saveFilesToTargetFolder(files, targetFolder) {
+  var rtn = []
+  for (var f of files) {
+    var newFile = `${targetFolder}/${f.originalFilename}`
+    console.log('saving file - ', newFile, f.originalFilename, f.size, f.path)
+    fs.renameSync(f.path, newFile)
+    rtn.push({ newFile, size: f.size })
+  }
+  return rtn
+}
+
+http.createServer(function (req, res) {
   if (req.url === '/upload' && req.method === 'POST') {
-
-    // ### POST /upload, upload and save a file in /tmp
+    // parse a file upload
     var form = new multiparty.Form();
-    form.parse(req, function(err, fields, files) {
 
-      // show all files' details
-      for(f in files){
-	      //console.log(f);
-      	console.log(util.inspect(files[f]));
-      }
+    form.parse(req, function (err, fields, files) {
+      // res.writeHead(200, { 'content-type': 'text/plain' });
+      // res.write('received upload:\n\n');
+      // res.end(util.inspect({ fields: fields, files: files }));
+      // res.end(JSON.stringify({ fields: fields, files: files }, null, 2));
 
+      var savedFilesInfo = saveFilesToTargetFolder(files.upload, folder)
 
-      // only handle first file
-      var afile = files[f][0];
-      var destFile = path.join(path.dirname(afile.path),afile.originalFilename);
-      console.log('saved as', destFile, '\n\n'); // console.log(afile.path, afile.originalFilename, destFile);
-      fs.renameSync(afile.path, destFile);
-
-      // show result web page
-      res.writeHead(200, {'content-type': 'text/html'});
-      res.write('<br/> <b>'+destFile+'</b> upload done! <br/><pre>');
-      res.write(util.inspect(afile));
-      res.end("</pre><br/><br/><a href='/upload'>upload again<a>"); // res.end(util.inspect({fields: fields, files: files}));
+      res.writeHead(200, { 'content-type': 'text/html' });
+      res.end(renderHtml(savedFilesInfo, files.upload));
     });
+
     return;
   }
 
-  // ### GET /upload, show a file upload form
-  res.writeHead(200, {'content-type': 'text/html'});
-  res.end(
-    '<br/>' + 
-    '<form action="/upload" enctype="multipart/form-data" method="post">'+
-    '<!-- input type="text" name="title"><br -->'+
-    'File: <input type="file" name="uploadFile" multiple="multiple"><br>'+
-    '<br/>' + 
-    '<input type="submit" value="Upload">'+
-    '</form>'
-  );
+  // show a file upload form
+  res.writeHead(200, { 'content-type': 'text/html' });
+  res.end(renderHtml(undefined, undefined));
 }).listen(port);
-
