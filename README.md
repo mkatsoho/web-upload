@@ -6,19 +6,18 @@ upload a file to the server via a web page. The file is saved in /tmp.
 ## how to install
 
 ```bash
-# clone from git
 git clone git@gitlab.com:michel-yg-chen/web-upload.git
-yarn install 
+yarn 
 ```
 
 ## how to run 
 
 ```bash
-yarn start		# http://ip:2222	# default using port 2222
+yarn start		# http://your_ip:2222 or http://localhost:2222
 ```
 
 
-## where to get the uploaded file
+## where to get the uploaded files
 
 ```bash
 ls -ltr /tmp/			# default in /tmp folder
