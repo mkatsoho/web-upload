@@ -34,8 +34,8 @@ function saveFilesToTargetFolder(files, targetFolder) {
   var rtn = []
   for (var f of files) {
     var newFile = `${targetFolder}/${f.originalFilename}`
-    console.log('saving file - ', newFile, f.originalFilename, f.size, f.path)
-    fs.renameSync(f.path, newFile)
+    console.log('copy file - ', newFile, f.originalFilename, f.size, f.path)
+    fs.copyFileSync(f.path, newFile)
     rtn.push({ newFile, size: f.size })
   }
   return rtn
